@@ -190,11 +190,18 @@ websocket_handshake(State=#state{key=Key, deflate_frame=DeflateFrame, handler=Ha
 		false -> [];
 		true -> [{<<"Sec-WebSocket-Extensions">>, <<"x-webkit-deflate-frame">>}]
 	end,
+
+    {ok, SubProtocols, _Req2} = elli_ws_request_adapter:parse_header(<<"sec-websocket-protocol">>, Req),
+    Extensions2 = case lists:member(<<"binary">>, SubProtocols) of
+        false -> Extensions;
+        true -> [{<<"Sec-WebSocket-Protocol">>, <<"binary">>}|Extensions]
+    end,
+
 	{ok, Req2} = elli_ws_request_adapter:upgrade_reply(
 		101,
 		[{<<"Upgrade">>, <<"websocket">>},
 		 {<<"Sec-WebSocket-Accept">>, Challenge}|
-		 Extensions],
+		 Extensions2],
 		Req),
 
 	%% Upgrade reply is sent, report that the websocket is open.

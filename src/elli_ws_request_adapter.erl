@@ -143,7 +143,10 @@ parse_header(<<"sec-websocket-extensions">>, #req_adapter{req=Req}=RA) ->
 	%% skip the rest.
 	Exts = elli_ws_http:tokens(Values),
 	Extensions = [{E, []} || E <- Exts, E =:= <<"x-webkit-deflate-frame">>],
-	{ok, Extensions, RA}.
+	{ok, Extensions, RA};
+parse_header(<<"sec-websocket-protocol">>, #req_adapter{req=Req}=RA) ->
+    Values = get_header_values(<<"Sec-WebSocket-Protocol">>, Req),
+    {ok, elli_ws_http:tokens(Values), RA}.
 
 % @doc Mimics cowboy_req:header/2
 %
